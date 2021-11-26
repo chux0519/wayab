@@ -9,18 +9,14 @@ int main() {
     return -1;
   }
 
-  struct wayab_renderer *renderer = wayab_renderer_new(wl, 1920, 1080);
-  if (renderer == NULL) {
-    LOG("wayab_renderer_new");
-    return -1;
-  }
-
   while (1) {
-    wl_display_dispatch_pending(renderer->native_display);
-    wayab_renderer_draw(renderer);
+    struct wayab_renderer *renderer, *tmp;
+    wl_list_for_each_safe(renderer, tmp, &wl->renderers, link) {
+      wl_display_dispatch_pending(renderer->native_display);
+      wayab_renderer_draw(renderer);
+    }
   }
 
-  wayab_renderer_destroy(renderer);
   wayab_wl_destroy(wl);
 
   return 0;

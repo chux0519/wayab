@@ -21,26 +21,17 @@
 ///   2.3 layer_shell
 /// 3. surface created by compositor
 /// 4. layer_shell listener
-///   4.1 layer_surface
+///   4.1 layer_surface with output
 /// 5. layer_surface listener
 ///   5.1 region
 struct wayab_wl {
   /* connect */
   struct wl_display *display;
-
   /* display listener */
   struct wl_compositor *compositor;
-  struct wl_output *output;
   struct zwlr_layer_shell_v1 *layer_shell;
 
-  /* created by compositor */
-  struct wl_surface *surface;
-
-  /* created by layer_shell */
-  struct zwlr_layer_surface_v1 *layer_surface;
-
-  /* created by surface listener */
-  struct wl_region *region;
+  struct wl_list renderers;
 };
 
 struct wayab_wl *wayab_wl_new();

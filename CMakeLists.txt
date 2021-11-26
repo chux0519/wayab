@@ -39,7 +39,7 @@ foreach(PROTO IN LISTS WAYLAND_PROTOCOLS_NAME WLR_PROTOCOLS_NAME)
   list(APPEND PROTO_SOURCES ${PROTOCOLS_DIR}/${PROTO_BASENAME}-protocol.c)
 endforeach()
 
-add_executable(wayab main.c ${PROTO_SOURCES})
+add_executable(wayab main.c render.c wl.c ${PROTO_SOURCES})
 
 target_link_libraries(
   wayab

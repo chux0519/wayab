@@ -1,6 +1,8 @@
 #include "wl.h"
 #include "render.h"
 
+#include <sys/epoll.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -69,4 +71,34 @@ int wayab_wl_destroy(struct wayab_wl *ptr) {
   wl_display_disconnect(ptr->display);
   free(ptr);
   return 0;
+}
+
+#define MAX_EVENTS 16
+
+void wayab_wl_loop(struct wayab_wl *wl) {
+  struct epoll_event ev, events[MAX_EVENTS];
+
+  int wl_fd = wl_display_get_fd(wl->display);
+
+  int epollfd = epoll_create1(0);
+  if (epollfd == -1) {
+    perror("epoll_create1");
+    exit(EXIT_FAILURE);
+  }
+
+  ev.events = EPOLLIN;
+  ev.data.fd = wl_fd;
+  if (epoll_ctl(epollfd, EPOLL_CTL_ADD, wl_fd, &ev) == -1) {
+    perror("epoll_ctl");
+    exit(EXIT_FAILURE);
+  }
+
+  while (1) {
+    wl_display_dispatch_pending(wl->display);
+    struct wayab_renderer *renderer, *tmp;
+    wl_list_for_each_safe(renderer, tmp, &wl->renderers, link) {
+      wayab_renderer_draw(renderer);
+    }
+    int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+  }
 }

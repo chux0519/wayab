@@ -38,5 +38,6 @@ struct wayab_wl {
 
 struct wayab_wl *wayab_wl_new();
 int wayab_wl_destroy(struct wayab_wl *);
+void wayab_wl_loop(struct wayab_wl *);
 
 #endif

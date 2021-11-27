@@ -70,8 +70,7 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
       zxdg_output_manager_v1_get_xdg_output(wl->output_manager, wl_output);
   zxdg_output_v1_add_listener(xdg_output, &xdg_output_listener, ptr);
 
-  // init layer_surface
-  // screen resolution will be init here
+  // init layer_surface and output resolution
   ptr->layer_surface = zwlr_layer_shell_v1_get_layer_surface(
       wl->layer_shell, ptr->wl_surface, wl_output,
       ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, "wayab");

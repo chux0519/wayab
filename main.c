@@ -9,13 +9,7 @@ int main() {
     return -1;
   }
 
-  while (1) {
-    wl_display_dispatch_pending(wl->display);
-    struct wayab_renderer *renderer, *tmp;
-    wl_list_for_each_safe(renderer, tmp, &wl->renderers, link) {
-      wayab_renderer_draw(renderer);
-    }
-  }
+  wayab_wl_loop(wl);
 
   wayab_wl_destroy(wl);
 

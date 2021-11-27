@@ -9,7 +9,9 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t width,
                                     uint32_t height) {
   struct wayab_renderer *ptr = data;
-
+  ptr->width = width;
+  ptr->height = height;
+  LOG("width: %d, height: %d\n", width, height);
   zwlr_layer_surface_v1_ack_configure(layer_surface, serial);
 }
 
@@ -24,10 +26,6 @@ static struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 
 struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
                                           struct wayab_wl *wl) {
-  // FIXME: read from output
-  int width = 1920;
-  int height = 1080;
-
   struct wayab_renderer *ptr = calloc(1, sizeof(struct wayab_renderer));
   ptr->native_display = wl->display;
   ptr->wl_output = wl_output;
@@ -57,7 +55,8 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
   wl_display_roundtrip(wl->display);
 
   // init window
-  ptr->native_window = wl_egl_window_create(ptr->wl_surface, width, height);
+  ptr->native_window =
+      wl_egl_window_create(ptr->wl_surface, ptr->width, ptr->height);
 
   if (ptr->native_window == EGL_NO_SURFACE) {
     LOG("Failed to create egl window\n");

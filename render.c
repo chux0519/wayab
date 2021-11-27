@@ -6,6 +6,8 @@
 
 #include <GLES2/gl2.h>
 
+#include <cairo/cairo-gl.h>
+
 static void handle_xdg_output_name(void *data,
                                    struct zxdg_output_v1 *xdg_output
                                    __attribute__((unused)),
@@ -150,6 +152,19 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
     goto error;
   }
 
+  ptr->cairo_device = cairo_egl_device_create(ptr->display, ptr->context);
+  if (cairo_device_status(ptr->cairo_device) != CAIRO_STATUS_SUCCESS) {
+    LOG("cairo_egl_device_create");
+    goto error;
+  }
+  ptr->cairo_surface = cairo_gl_surface_create_for_egl(
+      ptr->cairo_device, ptr->surface, ptr->width, ptr->height);
+
+  if (ptr->cairo_surface == NULL) {
+    LOG("cairo_gl_surface_create_for_egl");
+    goto error;
+  }
+
   return ptr;
 
 error:
@@ -172,14 +187,25 @@ int wayab_renderer_destroy(struct wayab_renderer *ptr) {
   return 0;
 }
 
-int wayab_renderer_draw(struct wayab_renderer *ptr) {
+int wayab_renderer_draw(struct wayab_renderer *ptr, int counter) {
   if (!eglMakeCurrent(ptr->display, ptr->surface, ptr->surface, ptr->context)) {
     LOG("eglMakeCurrent\n");
     return -1;
   }
-  glClearColor(0.5, 0.0, 0.0, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  float r = (float)(counter % 256) / 256.0;
+  float g = r;
+  float b = (float)(255 - (counter % 256)) / 256.0;
+  cairo_t *cr = cairo_create(ptr->cairo_surface);
+  cairo_set_source_rgb(cr, r, g, b);
+  cairo_paint(cr);
 
-  eglSwapBuffers(ptr->display, ptr->surface);
+  cairo_gl_surface_swapbuffers(ptr->cairo_surface);
+
+  cairo_destroy(cr);
+  //  glClearColor(r, g, b, 1.0);
+  //  glClear(GL_COLOR_BUFFER_BIT);
+  //
+  //  eglSwapBuffers(ptr->display, ptr->surface);
+
   return 0;
 }

@@ -8,6 +8,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglplatform.h>
 
+#include <cairo.h>
+
 struct wayab_renderer {
   EGLNativeDisplayType native_display;
   EGLNativeWindowType native_window;
@@ -25,12 +27,15 @@ struct wayab_renderer {
   int width;  // by layer_surface listener
   int height;
 
+  cairo_surface_t *cairo_surface;
+  cairo_device_t *cairo_device;
+
   struct wl_list link;
 };
 
 struct wayab_renderer *wayab_renderer_new(struct wl_output *,
                                           struct wayab_wl *);
 int wayab_renderer_destroy(struct wayab_renderer *);
-int wayab_renderer_draw(struct wayab_renderer *);
+int wayab_renderer_draw(struct wayab_renderer *, int counter);
 
 #endif

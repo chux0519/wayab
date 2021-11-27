@@ -23,6 +23,9 @@ include_directories(${WAYLAND_PROTOCOLS_INCLUDE_DIRS})
 pkg_get_variable(WAYLAND_PROTOCOLS_DATA_DIR wayland-protocols pkgdatadir)
 message(STATUS "wayland protocols data dir: ${WAYLAND_PROTOCOLS_DATA_DIR}")
 
+pkg_check_modules(CAIRO REQUIRED cairo)
+include_directories(${CAIRO_INCLUDE_DIRS})
+
 set(PROTOCOLS_DIR "${CMAKE_SOURCE_DIR}/protocols")
 set(WAYLAND_PROTOCOLS_NAME ${WAYLAND_PROTOCOLS_DATA_DIR}/stable/xdg-shell/xdg-shell.xml ${WAYLAND_PROTOCOLS_DATA_DIR}/unstable/xdg-output/xdg-output-unstable-v1.xml)
 set(WLR_PROTOCOLS_NAME wlr-layer-shell-unstable-v1.xml)
@@ -46,6 +49,7 @@ target_link_libraries(
   ${WAYLAND_EGL_LIBRARIES}
   ${WAYLAND_CLIENT_LIBRARIES}
   ${WAYLAND_PROTOCOLS_LIBRARIES}
+  ${CAIRO_LIBRARIES}
   EGL
   GLESv2
 )

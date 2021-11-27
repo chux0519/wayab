@@ -115,11 +115,12 @@ void wayab_wl_loop(struct wayab_wl *wl) {
     exit(EXIT_FAILURE);
   }
 
+  uint64_t data, counter = 0;
   while (1) {
     wl_display_dispatch_pending(wl->display);
     struct wayab_renderer *renderer, *tmp;
     wl_list_for_each_safe(renderer, tmp, &wl->renderers, link) {
-      wayab_renderer_draw(renderer);
+      wayab_renderer_draw(renderer, counter);
     }
 
     int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
@@ -131,9 +132,9 @@ void wayab_wl_loop(struct wayab_wl *wl) {
     }
     for (int i = 0; i < nfds; ++i) {
       if (events[i].events & EPOLLIN) {
-        uint64_t data;
         read(events[i].data.fd, &data, sizeof(uint64_t));
       }
     }
+    ++counter;
   }
 }

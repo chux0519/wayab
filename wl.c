@@ -20,6 +20,9 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
         wl_registry_bind(registry, id, &wl_output_interface, 3);
     struct wayab_renderer *renderer = wayab_renderer_new(wl_output, ptr);
     wl_list_insert(&ptr->renderers, &renderer->link);
+  } else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
+    ptr->output_manager =
+        wl_registry_bind(registry, id, &zxdg_output_manager_v1_interface, 2);
   }
 }
 
@@ -44,8 +47,9 @@ struct wayab_wl *wayab_wl_new() {
   struct wl_registry *wl_registry = wl_display_get_registry(ptr->display);
   wl_registry_add_listener(wl_registry, &listener, ptr);
   wl_display_roundtrip(ptr->display);
-  if (ptr->compositor == NULL || ptr->layer_shell == NULL) {
-    LOG("No compositor\n");
+  if (ptr->compositor == NULL || ptr->layer_shell == NULL ||
+      ptr->output_manager == NULL) {
+    LOG("wl_registry_add_listener\n");
     goto error;
   }
 
@@ -61,6 +65,7 @@ int wayab_wl_destroy(struct wayab_wl *ptr) {
   wl_list_for_each_safe(renderer, tmp, &ptr->renderers, link) {
     wayab_renderer_destroy(renderer);
   }
+  zxdg_output_manager_v1_destroy(ptr->output_manager);
   wl_display_disconnect(ptr->display);
   free(ptr);
   return 0;

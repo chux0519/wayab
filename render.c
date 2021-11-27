@@ -1,8 +1,34 @@
 #include "render.h"
 
+#include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <GLES2/gl2.h>
+
+static void handle_xdg_output_name(void *data,
+                                   struct zxdg_output_v1 *xdg_output
+                                   __attribute__((unused)),
+                                   const char *name) {
+  struct wayab_renderer *ptr = data;
+  ptr->name = strdup(name);
+}
+
+static void handle_xdg_output_done(void *data __attribute__((unused)),
+                                   struct zxdg_output_v1 *xdg_output) {
+  // We have no further use for this object.
+  zxdg_output_v1_destroy(xdg_output);
+}
+
+static void noop() {}
+
+struct zxdg_output_v1_listener xdg_output_listener = {
+    .name = handle_xdg_output_name,
+    .done = handle_xdg_output_done,
+    .logical_position = noop,
+    .logical_size = noop,
+    .description = noop,
+};
 
 static void layer_surface_configure(void *data,
                                     struct zwlr_layer_surface_v1 *layer_surface,
@@ -11,7 +37,7 @@ static void layer_surface_configure(void *data,
   struct wayab_renderer *ptr = data;
   ptr->width = width;
   ptr->height = height;
-  LOG("width: %d, height: %d\n", width, height);
+  LOG("name: %s width: %d, height: %d\n", ptr->name, width, height);
   zwlr_layer_surface_v1_ack_configure(layer_surface, serial);
 }
 
@@ -27,6 +53,7 @@ static struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
                                           struct wayab_wl *wl) {
   struct wayab_renderer *ptr = calloc(1, sizeof(struct wayab_renderer));
+  ptr->name = NULL;
   ptr->native_display = wl->display;
   ptr->wl_output = wl_output;
 
@@ -37,7 +64,14 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
     goto error;
   }
 
+  // init output name
+  assert(wl->output_manager != NULL);
+  struct zxdg_output_v1 *xdg_output =
+      zxdg_output_manager_v1_get_xdg_output(wl->output_manager, wl_output);
+  zxdg_output_v1_add_listener(xdg_output, &xdg_output_listener, ptr);
+
   // init layer_surface
+  // screen resolution will be init here
   ptr->layer_surface = zwlr_layer_shell_v1_get_layer_surface(
       wl->layer_shell, ptr->wl_surface, wl_output,
       ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, "wayab");
@@ -131,6 +165,9 @@ int wayab_renderer_destroy(struct wayab_renderer *ptr) {
   zwlr_layer_surface_v1_destroy(ptr->layer_surface);
   wl_surface_destroy(ptr->wl_surface);
   eglDestroyContext(ptr->display, ptr->context);
+  if (ptr->name) {
+    free(ptr->name);
+  }
   free(ptr);
 
   return 0;

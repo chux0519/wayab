@@ -7,6 +7,7 @@
 #include <wayland-client.h>
 
 #include "protocols/wlr-layer-shell-unstable-v1-client-protocol.h"
+#include "protocols/xdg-output-unstable-v1-client-protocol.h"
 
 #define LOG(...) fprintf(stderr, __VA_ARGS__)
 #define LOG_ERRNO(...)                                                         \
@@ -30,6 +31,7 @@ struct wayab_wl {
   /* display listener */
   struct wl_compositor *compositor;
   struct zwlr_layer_shell_v1 *layer_shell;
+  struct zxdg_output_manager_v1 *output_manager;
 
   struct wl_list renderers;
 };

@@ -21,7 +21,8 @@ struct wayab_renderer {
   struct wl_region *wl_region;
   struct zwlr_layer_surface_v1 *layer_surface;
 
-  int width;
+  char *name; // by xdg output manager
+  int width;  // by layer_surface listener
   int height;
 
   struct wl_list link;

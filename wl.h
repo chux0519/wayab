@@ -1,19 +1,14 @@
 #ifndef _WAYAB_WL_H
 #define _WAYAB_WL_H
 
+#include "utils.h"
+
 #include <stddef.h>
-#include <stdio.h>
 
 #include <wayland-client.h>
 
 #include "protocols/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "protocols/xdg-output-unstable-v1-client-protocol.h"
-
-#define LOG(...) fprintf(stderr, __VA_ARGS__)
-#define LOG_ERRNO(...)                                                         \
-  fprintf(stderr, "Error : %s\n", strerror(errno));                            \
-  fprintf(stderr, __VA_ARGS__)
-
 /// init process:
 /// 1. connect display
 /// 2. block display listener

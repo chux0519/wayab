@@ -1,6 +1,7 @@
 #ifndef _WAYAB_RENDER_H
 #define _WAYAB_RENDER_H
 
+#include "image.h"
 #include "wl.h"
 
 #include <wayland-egl.h>
@@ -29,6 +30,9 @@ struct wayab_renderer {
 
   cairo_surface_t *cairo_surface;
   cairo_device_t *cairo_device;
+  cairo_t *cr;
+
+  struct wayab_image *image;
 
   struct wl_list link;
 };
@@ -36,6 +40,6 @@ struct wayab_renderer {
 struct wayab_renderer *wayab_renderer_new(struct wl_output *,
                                           struct wayab_wl *);
 int wayab_renderer_destroy(struct wayab_renderer *);
-int wayab_renderer_draw(struct wayab_renderer *, int counter);
+int wayab_renderer_draw(struct wayab_renderer *, uint64_t counter);
 
 #endif

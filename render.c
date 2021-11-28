@@ -164,6 +164,9 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
     LOG("cairo_gl_surface_create_for_egl");
     goto error;
   }
+  ptr->cr = cairo_create(ptr->cairo_surface);
+  ptr->image = wayab_image_new("/home/yongsheng/.config/runcat/icons/mona",
+                               ptr->width, ptr->height);
 
   return ptr;
 
@@ -182,30 +185,29 @@ int wayab_renderer_destroy(struct wayab_renderer *ptr) {
   if (ptr->name) {
     free(ptr->name);
   }
+  if (ptr->image)
+    wayab_image_destroy(ptr->image);
+
+  if (ptr->cr)
+    cairo_destroy(ptr->cr);
+
   free(ptr);
 
   return 0;
 }
 
-int wayab_renderer_draw(struct wayab_renderer *ptr, int counter) {
+int wayab_renderer_draw(struct wayab_renderer *ptr, uint64_t counter) {
   if (!eglMakeCurrent(ptr->display, ptr->surface, ptr->surface, ptr->context)) {
     LOG("eglMakeCurrent\n");
     return -1;
   }
-  float r = (float)(counter % 256) / 256.0;
-  float g = r;
-  float b = (float)(255 - (counter % 256)) / 256.0;
-  cairo_t *cr = cairo_create(ptr->cairo_surface);
-  cairo_set_source_rgb(cr, r, g, b);
-  cairo_paint(cr);
+  int frame = counter % ptr->image->count;
+
+  glClear(GL_COLOR_BUFFER_BIT);
+  cairo_set_source(ptr->cr, ptr->image->patterns[frame]);
+  cairo_paint(ptr->cr);
 
   cairo_gl_surface_swapbuffers(ptr->cairo_surface);
-
-  cairo_destroy(cr);
-  //  glClearColor(r, g, b, 1.0);
-  //  glClear(GL_COLOR_BUFFER_BIT);
-  //
-  //  eglSwapBuffers(ptr->display, ptr->surface);
 
   return 0;
 }

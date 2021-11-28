@@ -26,6 +26,7 @@ message(STATUS "wayland protocols data dir: ${WAYLAND_PROTOCOLS_DATA_DIR}")
 pkg_check_modules(CAIRO REQUIRED cairo)
 include_directories(${CAIRO_INCLUDE_DIRS})
 
+
 set(PROTOCOLS_DIR "${CMAKE_SOURCE_DIR}/protocols")
 set(WAYLAND_PROTOCOLS_NAME ${WAYLAND_PROTOCOLS_DATA_DIR}/stable/xdg-shell/xdg-shell.xml ${WAYLAND_PROTOCOLS_DATA_DIR}/unstable/xdg-output/xdg-output-unstable-v1.xml)
 set(WLR_PROTOCOLS_NAME wlr-layer-shell-unstable-v1.xml)
@@ -42,7 +43,7 @@ foreach(PROTO IN LISTS WAYLAND_PROTOCOLS_NAME WLR_PROTOCOLS_NAME)
   list(APPEND PROTO_SOURCES ${PROTOCOLS_DIR}/${PROTO_BASENAME}-protocol.c)
 endforeach()
 
-add_executable(wayab main.c render.c wl.c ${PROTO_SOURCES})
+add_executable(wayab main.c render.c wl.c image.c ${PROTO_SOURCES})
 
 target_link_libraries(
   wayab
@@ -50,6 +51,7 @@ target_link_libraries(
   ${WAYLAND_CLIENT_LIBRARIES}
   ${WAYLAND_PROTOCOLS_LIBRARIES}
   ${CAIRO_LIBRARIES}
+  ${GDKPIXBUF_LIBRARIES}
   EGL
   GLESv2
 )

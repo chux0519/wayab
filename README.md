@@ -40,8 +40,9 @@ if you have a viedeo as input, you can use ffmpeg to do similar work.
 
 2. run following command
 
-> wayab -f <fps> -o <config>
+> wayab -f $fps -o $config
 
+- `-h` show help message 
 - `-f` set fps
 - `-o` output config, in format: `<output>:<path>:<resize>:<anchor>`
   - output is the output name

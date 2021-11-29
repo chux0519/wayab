@@ -219,6 +219,7 @@ int wayab_renderer_draw(struct wayab_renderer *ptr, uint64_t counter) {
   cairo_paint(ptr->cr);
 
   cairo_gl_surface_swapbuffers(ptr->cairo_surface);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   return 0;
 }

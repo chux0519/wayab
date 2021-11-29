@@ -23,7 +23,8 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
     struct wl_output *wl_output =
         wl_registry_bind(registry, id, &wl_output_interface, 3);
     struct wayab_renderer *renderer = wayab_renderer_new(wl_output, ptr);
-    wl_list_insert(&ptr->renderers, &renderer->link);
+    if (renderer)
+      wl_list_insert(&ptr->renderers, &renderer->link);
   } else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
     ptr->output_manager =
         wl_registry_bind(registry, id, &zxdg_output_manager_v1_interface, 2);
@@ -38,8 +39,10 @@ static void global_registry_remover(void *data, struct wl_registry *registry,
 static struct wl_registry_listener listener = {global_registry_handler,
                                                global_registry_remover};
 
-struct wayab_wl *wayab_wl_new() {
+struct wayab_wl *wayab_wl_new(struct wayab_config *config) {
   struct wayab_wl *ptr = calloc(1, sizeof(struct wayab_wl));
+  ptr->config = config;
+
   wl_list_init(&ptr->renderers);
 
   ptr->display = wl_display_connect(NULL);
@@ -52,7 +55,7 @@ struct wayab_wl *wayab_wl_new() {
   wl_registry_add_listener(wl_registry, &listener, ptr);
   wl_display_roundtrip(ptr->display);
   if (ptr->compositor == NULL || ptr->layer_shell == NULL ||
-      ptr->output_manager == NULL) {
+      ptr->output_manager == NULL || wl_list_empty(&ptr->renderers)) {
     LOG("wl_registry_add_listener\n");
     goto error;
   }
@@ -87,7 +90,7 @@ void wayab_wl_loop(struct wayab_wl *wl) {
   }
 
   struct itimerspec ts;
-  int msec = 100; // 10FPS
+  int msec = (int)(1000.0 / (double)wl->config->fps);
   ts.it_interval.tv_sec = msec / 1000;
   ts.it_interval.tv_nsec = (msec % 1000) * 1000000;
   ts.it_value.tv_sec = 0;

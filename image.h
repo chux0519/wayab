@@ -7,14 +7,14 @@
 #include <stdint.h>
 
 struct wayab_image {
-  char *dir; // dir
+  char *dir;
   int count;
 
-  char **paths;
-  cairo_pattern_t **patterns;
+  cairo_surface_t **surfaces;
 };
 
-struct wayab_image *wayab_image_new(const char *path, int width, int height);
+struct wayab_image *wayab_image_new(const char *path, cairo_t *, int width,
+                                    int height);
 int wayab_image_destroy(struct wayab_image *);
 void wayab_image_next_frame(struct wayab_image *, uint64_t counter);
 

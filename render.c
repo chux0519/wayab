@@ -165,7 +165,7 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
     goto error;
   }
   ptr->cr = cairo_create(ptr->cairo_surface);
-  ptr->image = wayab_image_new("/home/yongsheng/.config/runcat/icons/mona",
+  ptr->image = wayab_image_new("/home/yongsheng/Pictures/bg_out_old", ptr->cr,
                                ptr->width, ptr->height);
 
   return ptr;
@@ -203,8 +203,8 @@ int wayab_renderer_draw(struct wayab_renderer *ptr, uint64_t counter) {
   }
   int frame = counter % ptr->image->count;
 
-  glClear(GL_COLOR_BUFFER_BIT);
-  cairo_set_source(ptr->cr, ptr->image->patterns[frame]);
+  cairo_surface_t *cache_surface = ptr->image->surfaces[frame];
+  cairo_set_source_surface(ptr->cr, cache_surface, 0, 0);
   cairo_paint(ptr->cr);
 
   cairo_gl_surface_swapbuffers(ptr->cairo_surface);

@@ -45,7 +45,7 @@ if you have a viedeo as input, you can use ffmpeg to do similar work.
 - `-f` set fps
 - `-o` output config, in format: `<output>:<path>:<resize>:<anchor>`
   - output is the output name
-  - path is the images abs path
+  - path is the abs path which contains all frames(need to be PNG) of some animated pictures
   - resize could be none/fill/fit/stretch/tile
   - anchor is a coordinate in range (0.0,0.0) to (1.0,1.0)
     - 0.0,0.0 means left-top

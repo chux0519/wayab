@@ -127,7 +127,22 @@ int main(int argc, char **argv) {
       printf("Usage: wayab -f <fps> -o <output>:<path>:<resize>:<anchor>\n");
       printf("\n");
       printf("-f: fps, default to %d.\n", FPS);
-      printf("-o: for all monitors, pass `*` as output string.\n");
+      printf(
+          "-o: output configs\n"
+          "  - <output> is the output name, like eDP-1/DP-2/.., for all "
+          "outputs, use *\n"
+          "  - <path> is the path which contains all frames(need to be PNG) of "
+          "some animated "
+          "image\n"
+          "  - <resize>(optional) could be none/fill/fit/stretch/tile, default "
+          "to none\n"
+          "  - <anchor>(optional) is a coordinate in range (0.0,0.0) to "
+          "(1.0,1.0), default to 0.5,0.5\n"
+          "    - 0.0,0.0 means left-top\n"
+          "    - 1.0,0.0 means right-top\n"
+          "    - 0.0,1.0 means left-bottom\n"
+          "    - 1.0,1.0 means right-bottom\n"
+          "For example: wayab -f 10 -o *:/tmp/a\n");
       return 0;
     case 'f':
       config.fps = atoi(optarg);

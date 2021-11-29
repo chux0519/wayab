@@ -10,19 +10,6 @@
 #include "protocols/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "protocols/xdg-output-unstable-v1-client-protocol.h"
 
-struct wayab_rule {
-  char *output_name;
-  char *dir;
-
-  struct wl_list link;
-};
-
-struct wayab_config {
-  int fps;
-
-  struct wl_list rules;
-};
-
 /// init process:
 /// 1. connect display
 /// 2. block display listener

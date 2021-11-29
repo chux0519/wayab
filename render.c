@@ -170,7 +170,7 @@ struct wayab_renderer *wayab_renderer_new(struct wl_output *wl_output,
   wl_list_for_each_safe(rule, tmp, &wl->config->rules, link) {
     if (strcmp(rule->output_name, "*") == 0 ||
         strcmp(rule->output_name, ptr->name) == 0) {
-      ptr->image = wayab_image_new(rule->dir, ptr->cr, ptr->width, ptr->height);
+      ptr->image = wayab_image_new(rule, ptr->cr, ptr->width, ptr->height);
       break;
     }
   }

@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct wayab_image *wayab_image_new(const char *path, cairo_t *cr, int width,
-                                    int height) {
+struct wayab_image *wayab_image_new(const struct wayab_rule *rule, cairo_t *cr,
+                                    int width, int height) {
   struct wayab_image *ptr = calloc(1, sizeof(struct wayab_image));
-  ptr->dir = strdup(path);
+  ptr->dir = strdup(rule->dir);
   ptr->count = 0;
 
   struct dirent *de;
   DIR *dir;
 
-  dir = opendir(path);
+  dir = opendir(rule->dir);
   if (dir == NULL) {
     LOG("opendir");
     goto error;
@@ -31,7 +31,7 @@ struct wayab_image *wayab_image_new(const char *path, cairo_t *cr, int width,
   char **paths = malloc(ptr->count * sizeof(char *));
   ptr->surfaces = malloc(ptr->count * sizeof(cairo_surface_t *));
 
-  dir = opendir(path);
+  dir = opendir(rule->dir);
   if (dir == NULL) {
     LOG("opendir");
     goto error;
@@ -42,9 +42,9 @@ struct wayab_image *wayab_image_new(const char *path, cairo_t *cr, int width,
     if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) {
       continue;
     }
-    int len = strlen(path) + 1 + strlen(de->d_name) + 1;
+    int len = strlen(rule->dir) + 1 + strlen(de->d_name) + 1;
     paths[n] = malloc(len * sizeof(char));
-    strcpy(paths[n], path);
+    strcpy(paths[n], rule->dir);
     strcat(paths[n], "/");
     strcat(paths[n], de->d_name);
     ++n;
@@ -73,16 +73,32 @@ struct wayab_image *wayab_image_new(const char *path, cairo_t *cr, int width,
     cairo_matrix_t matrix;
     cairo_matrix_init_identity(&matrix);
 
-    // scale to fit output
+    // scale to fill output
     double scale_x = (double)width / (double)s_width;
     double scale_y = (double)height / (double)s_height;
-    double scale = scale_x < scale_y ? scale_x : scale_y;
+    double scale;
+    switch (rule->resize) {
+    case NONE:
+      scale = 1.0;
+      break;
+    case FIT:
+      scale = scale_x < scale_y ? scale_x : scale_y;
+      break;
+    case FILL:
+      scale = scale_x > scale_y ? scale_x : scale_y;
+      break;
+    case STRETCH:
+    case TILE:
+    default:
+      break;
+    }
+
     double after_x = s_width * scale;
     double after_y = s_height * scale;
 
     // translate to center
-    int offset_x = (width - after_x) / 2;
-    int offset_y = (height - after_y) / 2;
+    int offset_x = ((double)width - after_x) * rule->anchor_x;
+    int offset_y = ((double)height - after_y) * rule->anchor_y;
 
     cairo_matrix_scale(&matrix, 1 / scale, 1 / scale);
     cairo_matrix_translate(&matrix, -offset_x, -offset_y);

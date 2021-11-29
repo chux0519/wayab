@@ -80,27 +80,38 @@ struct wayab_image *wayab_image_new(const struct wayab_rule *rule, cairo_t *cr,
     switch (rule->resize) {
     case NONE:
       scale = 1.0;
+      scale_x = scale;
+      scale_y = scale;
       break;
     case FIT:
       scale = scale_x < scale_y ? scale_x : scale_y;
+      scale_x = scale;
+      scale_y = scale;
       break;
     case FILL:
       scale = scale_x > scale_y ? scale_x : scale_y;
+      scale_x = scale;
+      scale_y = scale;
       break;
     case STRETCH:
+      break;
     case TILE:
+      cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
+      scale_x = 1;
+      scale_y = 1;
+      break;
     default:
       break;
     }
 
-    double after_x = s_width * scale;
-    double after_y = s_height * scale;
+    double after_x = s_width * scale_x;
+    double after_y = s_height * scale_y;
 
     // translate to center
     int offset_x = ((double)width - after_x) * rule->anchor_x;
     int offset_y = ((double)height - after_y) * rule->anchor_y;
 
-    cairo_matrix_scale(&matrix, 1 / scale, 1 / scale);
+    cairo_matrix_scale(&matrix, 1 / scale_x, 1 / scale_y);
     cairo_matrix_translate(&matrix, -offset_x, -offset_y);
     cairo_pattern_set_matrix(pattern, &matrix);
 

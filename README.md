@@ -63,3 +63,9 @@ for example, if you have two directory for two gifs, `/tmp/a` and `/tmp/b`, and 
 means, you set the fps to 10, and set `/tmp/a` as `eDP-1`'s background, no resize will be applied and aligned to center. And `/tmp/b` as `DP-2`'s background, it will be resized to fill the output and aligned to center-bottom.
 
 
+## Example
+
+
+https://user-images.githubusercontent.com/14276970/144039851-497ed32e-fd20-4b27-9c84-86b1bab2fccd.mp4
+
+image from [1041uuu](https://1041uuu.tumblr.com/page/3)

@@ -4,6 +4,7 @@
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -128,6 +129,9 @@ void wayab_wl_loop(struct wayab_wl *wl) {
 
     int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
     if (nfds == -1) {
+      if (errno == EINTR) {
+        continue;
+      }
       perror("epoll_pwait");
       close(epollfd);
       close(tfd);

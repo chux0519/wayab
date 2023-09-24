@@ -8,6 +8,7 @@ set(CMAKE_C_FLAGS_ASAN
     CACHE STRING "Flags used by the C compiler during AddressSanitizer builds."
     FORCE)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(PkgConfig REQUIRED)
 
@@ -23,9 +24,9 @@ include_directories(${WAYLAND_PROTOCOLS_INCLUDE_DIRS})
 pkg_get_variable(WAYLAND_PROTOCOLS_DATA_DIR wayland-protocols pkgdatadir)
 message(STATUS "wayland protocols data dir: ${WAYLAND_PROTOCOLS_DATA_DIR}")
 
-pkg_check_modules(CAIRO REQUIRED cairo)
+find_package(Cairo REQUIRED)
 include_directories(${CAIRO_INCLUDE_DIRS})
-
+message(STATUS "cairo include dir: ${CAIRO_INCLUDE_DIRS}")
 
 set(PROTOCOLS_DIR "${CMAKE_SOURCE_DIR}/protocols")
 set(WAYLAND_PROTOCOLS_NAME ${WAYLAND_PROTOCOLS_DATA_DIR}/stable/xdg-shell/xdg-shell.xml ${WAYLAND_PROTOCOLS_DATA_DIR}/unstable/xdg-output/xdg-output-unstable-v1.xml)

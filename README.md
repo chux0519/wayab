@@ -17,7 +17,7 @@ wayab(wayland animated background) allows user to set animated background on Lin
   - stable/xdg-shell/xdg-shell.xml
   - unstable/xdg-output/xdg-output-unstable-v1.xml (for output name)
   - wlr-layer-shell-unstable-v1.xml (for the `background` role and output size)
-- cairo and cairo-gl (the `aur/cairo-glesv2-bin` package if you use Arch)
+- cairo and cairo-gl (the `aur/cairo-glesv3-bin` package if you use Arch)
 - also need your PC to support EGL and GLESv2
 
 ## Build
@@ -69,3 +69,14 @@ means, you set the fps to 10, and set `/tmp/a` as `eDP-1`'s background, no resiz
 https://user-images.githubusercontent.com/14276970/144039851-497ed32e-fd20-4b27-9c84-86b1bab2fccd.mp4
 
 image from [1041uuu](https://1041uuu.tumblr.com/page/3)
+
+
+## Update
+
+cairo dropped opengl backend support since 1.17.8, to make wayab work, we should use cairo 1.17.4 which still provide `cairo-gl`.
+
+just download the prebuilt version of cairo from [aur/cairo-glesv3-bin](https://webreflection.github.io/aur/cairo-glesv2-bin-x86_64-1.17.4.tar.gz).
+
+then use following command with cmake
+
+> cmake -DCairo_ROOT=/path/to/prebuilt/root ..

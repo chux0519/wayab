@@ -1,0 +1,3 @@
+[submodule "3rd-party/cairo"]
+	path = 3rd-party/cairo
+	url = https://gitlab.freedesktop.org/cairo/cairo.git

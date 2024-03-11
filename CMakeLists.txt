@@ -24,9 +24,49 @@ include_directories(${WAYLAND_PROTOCOLS_INCLUDE_DIRS})
 pkg_get_variable(WAYLAND_PROTOCOLS_DATA_DIR wayland-protocols pkgdatadir)
 message(STATUS "wayland protocols data dir: ${WAYLAND_PROTOCOLS_DATA_DIR}")
 
-find_package(Cairo REQUIRED)
-include_directories(${CAIRO_INCLUDE_DIRS})
-message(STATUS "cairo include dir: ${CAIRO_INCLUDE_DIRS}")
+include(ExternalProject)
+set(LIBCAIRO_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcairo-1.17.4)
+set(LIBCAIRO_SHARED_LIB ${LIBCAIRO_PREFIX}/lib/libcairo.so.2.11704.0)
+set(LIBCAIRO_INCLUDES ${LIBCAIRO_PREFIX}/include)
+set(LIBCAIRO_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/cairo)
+
+file(MAKE_DIRECTORY ${LIBCAIRO_INCLUDES})
+
+ExternalProject_Add(
+  libcairo
+  SOURCE_DIR ${LIBCAIRO_SOURCE}
+  DOWNLOAD_COMMAND cd ${LIBCAIRO_SOURCE} && git clean -dfX && ${LIBCAIRO_SOURCE}/autogen.sh
+  CONFIGURE_COMMAND ${LIBCAIRO_SOURCE}/configure 
+    --prefix=${LIBCAIRO_PREFIX} 
+    --enable-glesv3=yes 
+    --enable-egl=yes 
+    --enable-xlib=no
+    --enable-xlib-xrender=no
+    --enable-xlib-xcb=no
+    --enable-xcb=no
+    --enable-xcb-shm=no
+    --enable-quartz=no
+    --enable-win32=no
+    --enable-script=no
+    --enable-ft=no
+    --enable-fc=no
+    --enable-pdf=no
+    --enable-ps=no
+    --enable-svg=no
+    --enable-gobject=no
+    --enable-interpreter=no
+    --enable-symbol-lookup=no
+    --enable-full-testing=no
+    --enable-trace=no
+  BUILD_COMMAND make
+  INSTALL_COMMAND make install
+  #BUILD_BYPRODUCTS ${LIBCAIRO_SHARED_LIB}
+  BUILD_IN_SOURCE 1
+)
+add_library(cairo_1_17_4 SHARED IMPORTED GLOBAL)
+add_dependencies(cairo_1_17_4 libcairo)
+set_target_properties(cairo_1_17_4 PROPERTIES IMPORTED_LOCATION ${LIBCAIRO_SHARED_LIB})
+set_target_properties(cairo_1_17_4 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${LIBCAIRO_INCLUDES})
 
 set(PROTOCOLS_DIR "${CMAKE_SOURCE_DIR}/protocols")
 set(WAYLAND_PROTOCOLS_NAME ${WAYLAND_PROTOCOLS_DATA_DIR}/stable/xdg-shell/xdg-shell.xml ${WAYLAND_PROTOCOLS_DATA_DIR}/unstable/xdg-output/xdg-output-unstable-v1.xml)
@@ -44,6 +84,8 @@ foreach(PROTO IN LISTS WAYLAND_PROTOCOLS_NAME WLR_PROTOCOLS_NAME)
   list(APPEND PROTO_SOURCES ${PROTOCOLS_DIR}/${PROTO_BASENAME}-protocol.c)
 endforeach()
 
+include_directories(${LIBCAIRO_INCLUDES} ${LIBCAIRO_INCLUDES}/cairo)
+
 add_executable(wayab main.c render.c wl.c image.c ${PROTO_SOURCES})
 
 target_link_libraries(
@@ -51,7 +93,7 @@ target_link_libraries(
   ${WAYLAND_EGL_LIBRARIES}
   ${WAYLAND_CLIENT_LIBRARIES}
   ${WAYLAND_PROTOCOLS_LIBRARIES}
-  ${CAIRO_LIBRARIES}
+  cairo_1_17_4
   EGL
   GLESv2
 )

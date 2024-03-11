@@ -80,3 +80,11 @@ just download the prebuilt version of cairo from [aur/cairo-glesv3-bin](https://
 then use following command with cmake
 
 > cmake -DCairo_ROOT=/path/to/prebuilt/root ..
+
+### Update 2024/03/11
+
+this repo vendored libcairo 1.17.4, so just
+
+> git submodule --init
+
+after clone or add `--recursive` when getting this repo

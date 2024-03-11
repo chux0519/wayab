@@ -83,11 +83,13 @@ int wayab_wl_destroy(struct wayab_wl *ptr) {
 
 void wayab_wl_loop(struct wayab_wl *wl) {
   struct epoll_event ev, events[MAX_EVENTS];
+  int tfd = -1;
+  int epollfd = -1;
 
-  int tfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
+  tfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
   if (tfd == -1) {
     perror("timerfd_create");
-    exit(EXIT_FAILURE);
+    goto error;
   }
 
   struct itimerspec ts;
@@ -99,24 +101,20 @@ void wayab_wl_loop(struct wayab_wl *wl) {
 
   if (timerfd_settime(tfd, 0, &ts, NULL) < 0) {
     perror("timerfd_settime");
-    close(tfd);
-    exit(EXIT_FAILURE);
+    goto error;
   }
 
-  int epollfd = epoll_create1(0);
+  epollfd = epoll_create1(0);
   if (epollfd == -1) {
     perror("epoll_create1");
-    close(tfd);
-    exit(EXIT_FAILURE);
+    goto error;
   }
 
   ev.events = EPOLLIN;
   ev.data.fd = tfd;
   if (epoll_ctl(epollfd, EPOLL_CTL_ADD, tfd, &ev) == -1) {
     perror("epoll_ctl");
-    close(epollfd);
-    close(tfd);
-    exit(EXIT_FAILURE);
+    goto error;
   }
 
   uint64_t data, counter = 0;
@@ -124,7 +122,10 @@ void wayab_wl_loop(struct wayab_wl *wl) {
     wl_display_dispatch_pending(wl->display);
     struct wayab_renderer *renderer, *tmp;
     wl_list_for_each_safe(renderer, tmp, &wl->renderers, link) {
-      wayab_renderer_draw(renderer, counter);
+      if (wayab_renderer_draw(renderer, counter)) {
+        LOG("Failed to render\n");
+        goto error;
+      }
     }
 
     int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
@@ -133,9 +134,7 @@ void wayab_wl_loop(struct wayab_wl *wl) {
         continue;
       }
       perror("epoll_pwait");
-      close(epollfd);
-      close(tfd);
-      exit(EXIT_FAILURE);
+      goto error;
     }
     for (int i = 0; i < nfds; ++i) {
       if (events[i].events & EPOLLIN) {
@@ -144,4 +143,11 @@ void wayab_wl_loop(struct wayab_wl *wl) {
     }
     ++counter;
   }
+
+error:
+  if (epollfd != -1)
+    close(epollfd);
+  if (tfd != -1)
+    close(tfd);
+  exit(EXIT_FAILURE);
 }

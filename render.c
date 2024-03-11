@@ -215,6 +215,14 @@ int wayab_renderer_draw(struct wayab_renderer *ptr, uint64_t counter) {
   int frame = counter % ptr->image->count;
 
   cairo_surface_t *cache_surface = ptr->image->surfaces[frame];
+  if (cache_surface == NULL) {
+    if (wayab_image_bootstrap(ptr->image, ptr->cr, ptr->width, ptr->height,
+                              0)) {
+      LOG("Failed to load frames\n");
+      return -1;
+    }
+    return 0;
+  }
   cairo_set_source_surface(ptr->cr, cache_surface, 0, 0);
   cairo_paint(ptr->cr);
 
